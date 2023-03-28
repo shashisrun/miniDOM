@@ -72,7 +72,7 @@ class miniDOM {
     }
 
     // Create Virtual Node
-    createElement(elementName) {
+    createNode(elementName) {
         const node = {
             tagName: elementName
         }
@@ -82,10 +82,14 @@ class miniDOM {
     }
 
     // Append Virtual Node
-    append(parentNode, childNode) {
+    appendNode(parentNode, childNode) {
         parentNode.childrens.push(childNode)
         childNode.parentNode = parentNode;
         return node;
+    }
+
+    // Remove Virtual Node
+    removeNode() {
     }
 
     // get Virtual Node by ID
