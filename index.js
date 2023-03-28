@@ -190,3 +190,5 @@ class miniDOM {
     }
 
 }
+
+module.exports = miniDOM
