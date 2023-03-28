@@ -113,6 +113,16 @@ class miniDOM {
         return this.#tagLists[tagName.toUpperCase()];
     }
 
+    // get Virtual Node by query
+    querySelector(tagName) {
+        return this.#tagLists[tagName.toUpperCase()];
+    }
+
+    // get Virtual Nodes by query
+    querySelectorAll(tagName) {
+        return this.#tagLists[tagName.toUpperCase()];
+    }
+
     // Subscribe to changes on Virtual Node
     subscribeNode(object, fn) {
         let fns = this.#nodeWatchers.get(object);
