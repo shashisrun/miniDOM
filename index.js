@@ -51,6 +51,7 @@ class miniDOM {
         virtNode.element = node;
         return virtNode;
     }
+
     // Convert DOM Node and it's childrens to JS Object
     #toJSON(node) {
         const virtDOM = this.#getAttributes(node);
