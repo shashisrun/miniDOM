@@ -1,0 +1,11 @@
+{
+  "name": "minidom",
+  "version": "1.0.0",
+  "description": "A simple DOM manipulation library with the help JavaScript Virtual DOM",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Shashi Sharma",
+  "license": "ISC"
+}
