@@ -1,4 +1,4 @@
-class miniDOM {
+export default class miniDOM {
 
     miniDOM;
     #ids = {};
@@ -7,11 +7,12 @@ class miniDOM {
     #nodeWatchers = new Map();
     #updates = new Map();
     #states = {};
+    #privateFunctions = []
     #stateWatchers = new Map();
 
 
     constructor(node) {
-        this.miniDOM = this.#toJSON(node);
+        this.miniDOM = this.toJSON(node);
     }
 
     // Get All attributes of DOM Node
@@ -38,6 +39,7 @@ class miniDOM {
                     virtNode[attributes[i].nodeName] = attributes[i].nodeValue;
                     break;
             }
+            this.collectPrivateFunctions(virtNode, [attributes[i].nodeName])
         }
         virtNode.childrens = [];
         virtNode.nodes = [];
@@ -53,18 +55,21 @@ class miniDOM {
     }
 
     // Convert DOM Node and it's childrens to JS Object
-    #toJSON(node) {
+    toJSON(node) {
         const virtDOM = this.#getAttributes(node);
+        let order = 0;
         for (let i = 0; i < node.childNodes.length; i++) {
+            order = order + 1;
             if (!node.childNodes[i].attributes) {
                 const child = {}
                 child.key = node.childNodes[i].nodeName;
                 child.value = node.childNodes[i].nodeValue;
-                child.order = i;
+                child.order = order;
                 virtDOM.nodes[virtDOM.nodes.length] = child;
+                const fnNodes = this.collectPrivateFunctions(virtDOM, ['nodes', virtDOM.nodes.length - 1])
             } else {
-                const child = this.#toJSON(node.childNodes[i]);
-                child.order = i;
+                const child = this.toJSON(node.childNodes[i]);
+                child.order = order;
                 child.parentNode = virtDOM;
                 virtDOM.childrens[virtDOM.childrens.length] = child;
             }
@@ -144,25 +149,31 @@ class miniDOM {
     }
 
     // update Virtual Node
-    update(object, path, value, avoidLog) {
+    update(object, path, value) {
         if (path.length == 1 && path[0] !== '#classLists' && path[0] !== 'tagName' && path[0] !== 'childrens' && path[0] !== 'nodes') {
-            object[path[0]] = value instanceof Function ? value() : value;
+            object[path[0]] = value;
         } else if (path[0] === 'childrens') {
-            object.childrens[path[1]].value = value instanceof Function ? value() : value;
+            if (object.childrens[path[1]]) {
+                object.childrens[path[1]].value = value;
+            } else {
+                object.childrens[path[1]] = value;
+            }
         } else if (path[0] === 'nodes') {
-            object.nodes[path[1]].value = value instanceof Function ? value() : value;
+            if (object.nodes[path[1]]) {
+                object.nodes[path[1]].value = value;
+            } else {
+                object.nodes[path[1]] = value;
+            }
         } else if (path[0] === 'classList') {
             if (object.classList.length != object.element.classList.length || object.classList.length != Array.of(new set([...object.classList, ...object.element.classList])).length) {
-                object.classList = value instanceof Function ? value() : value;
+                object.classList = value;
             }
         }
-        if (!avoidLog) {
-            this.#updates.set(object, {
+        this.#updates.set(object, {
 
-                path: path,
-                value: value instanceof Function ? value : null
-            })
-        }
+            path: path,
+            value: value instanceof Function ? value : null
+        })
 
         const fns = this.#nodeWatchers.get(object);
         if (fns) {
@@ -172,59 +183,29 @@ class miniDOM {
         }
     }
 
-    // Create Statefull Component
-    createComponent() {
-        
-    }
-
-    // Delete Statefull Component
-    deleteComponent() {
-        
-    }
-
-    // Create State
-    createState(key, value) {
-        if (this.#states.hasOwnProperty(key)) {
-            throw 'State Already Exits';
-        }
-        this.#states[key] = value;
-    }
-
-    // Update State
-    updateState(key, value) {
-        if (!this.#states.hasOwnProperty(key)) {
-            throw 'State Does Not Exits';
-        }
-        this.#states[key] = value;
-    }
-
-    // use State
-    useState(key) {
-        if (!this.#states.hasOwnProperty(key)) {
-            throw 'State Does Not Exits';
-        }
-        return this.#states[key];
-    }
-
     // Delete State
     deleteState() {
-        
+
     }
 
     // Subscribe for states change
     subscribeState() {
-        
+
     }
 
     // unubscribe for states change
     unsubscribeState() {
-        
+
     }
 
     // Update Real DOM Node
     #updateNode(object, path) {
         if (path.length == 1 && path[0] !== '#classLists' && path[0] !== 'tagName' && path[0] !== 'childrens' && path[0] !== 'nodes') {
-            object.element.setAttribute(path[0], object[path[0]]);
+            if (object[path[0]] instanceof Function) {
+                object.element[path[0]] = object[path[0]];
+            } else {
+                object.element.setAttribute(path[0], object[path[0]]);
+            }
         } else if (path[0] === 'childrens') {
             object.element.childNodes[object.childrens[path[1]].order].nodeValue = object.childrens[path[1]].value
         } else if (path[0] === 'nodes') {
@@ -237,39 +218,72 @@ class miniDOM {
     }
 
     // Amend Changes to DOM
-    updateDom() {
+    updateDOM() {
         for (let [key, value] of this.#updates) {
-            if (value) {
-                this.update(key, value.path, value.value, true)
-            } else {
-                this.update.delete(key);
-            }
+            this.#updates.delete(key);
             this.#updateNode(key, value.path)
-        }
-        for (let i = 0; i < this.#updates.length; i++) {
         }
     }
 
     // add Event Listener
     addEventListener() {
-        
+
     }
 
     // remove Event Listener
     removeEventListener() {
-        
+
     }
 
     // remove Event Listener
     removeAllEventListener() {
-        
+
     }
 
     // remove Event Listener
     listAllEventListener() {
-        
+
+    }
+
+    getPrivateFunctions() {
+        return this.#privateFunctions;
+    }
+
+    collectPrivateFunctions(object, path) {
+        let res;
+        let nodeValue;
+        if (path.length == 1 && path[0] !== '#classLists' && path[0] !== 'tagName' && path[0] !== 'childrens' && path[0] !== 'nodes') {
+            nodeValue = object[path[0]]
+        } else if (path[0] === 'nodes') {
+            nodeValue = object.nodes[path[1]].value
+        } else if (path[0] === 'classList') {
+            if (object.classList.length != object.element.classList.length || object.classList.length != Array.of(new set([...object.classList, ...object.element.classList])).length) {
+                nodeValue = object.classList
+            }
+        }
+
+        if ((typeof nodeValue === 'string' || nodeValue instanceof String || Array.isArray(nodeValue)) && nodeValue.indexOf('{{{') > -1 && nodeValue.indexOf('}}}') > -1) { 
+            res = {
+                object: object,
+                path: path,
+            }
+            this.#privateFunctions.push(res)
+        }
+        return res
+    }
+
+    getValue(object, path) {
+        let nodeValue;
+        if (path.length == 1 && path[0] !== '#classLists' && path[0] !== 'tagName' && path[0] !== 'childrens' && path[0] !== 'nodes') {
+            nodeValue = object[path[0]]
+        } else if (path[0] === 'nodes') {
+            nodeValue = object.nodes[path[1]].value
+        } else if (path[0] === 'classList') {
+            if (object.classList.length != object.element.classList.length || object.classList.length != Array.of(new set([...object.classList, ...object.element.classList])).length) {
+                nodeValue = object.classList
+            }
+        }
+        return nodeValue;
     }
 
 }
-
-module.exports = miniDOM

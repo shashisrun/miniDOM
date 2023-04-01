@@ -4,7 +4,8 @@
   "description": "A simple DOM manipulation library with the help JavaScript Virtual DOM",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src -d lib"
   },
   "author": "Shashi Sharma",
   "license": "ISC",
@@ -15,5 +16,6 @@
   "bugs": {
     "url": "https://github.com/shashisrun/miniDOM/issues"
   },
-  "homepage": "https://github.com/shashisrun/miniDOM#readme"
+  "homepage": "https://github.com/shashisrun/miniDOM#readme",
+  "type": "module"
 }
