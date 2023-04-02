@@ -1,4 +1,4 @@
-export default class miniState {
+export default class MiniState {
     
     #state;
     #subscriptions = [];

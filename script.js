@@ -1,22 +1,65 @@
-import { miniComponent, miniDOM } from './src/index.js'
+import { MiniComponent, MiniDOM } from './src/index.js'
 
-const doc = new miniDOM(document.body);
-const component = new miniComponent();
+const container = document.createElement('div');
+document.body.appendChild(container);
 
-// console.log(component.getAllStates());
-// component.getAllStates()[0].update('Hi From Hello')
+const component = new MiniComponent(container);
 
-const hello = component.useState('Hello');
+const clicks = component.useState(0)
 
-// console.log(hello.get())
-// hello.update('Hi from new hello');
-// console.log(hello.get())
+component.createTemplate([
+    {
+        tagName: 'div',
+        className: 'container mx-auto',
+        childNodes: [
+            {
+                tagName: 'h1',
+                onclick: function () {
+                    clicks.update(clicks.get() + 1)
+                    console.log(`I was clicked ${clicks.get()} time(s)`)
+                },
+                className: 'text-3xl',
+                childNodes: [
+                    {
+                        text: component.dynamic(() => `I was clicked ${clicks.get()} time(s)`)
+                    }
+                ]
+            },
+            {
+                tagName: 'h2',
+                className: 'text-xl',
+                childNodes: [
+                    {
+                        text: 'Kaise Ho tum'
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        tagName: 'div',
+        className: 'container',
+        childNodes: [
+            {
+                tagName: 'h1',
+                className: 'text-3xl',
+                childNodes: [
+                    {
+                        text: 'Ankit Sharma'
+                    }
+                ]
+            },
+            {
+                tagName: 'h2',
+                className: 'text-xl',
+                childNodes: [
+                    {
+                        text: 'Kaise Ho tum'
+                    }
+                ]
+            }
+        ]
+    }
+])
 
-component.createFunction('hello', () => { return hello.get() })
-component.createFunction('onchange', (event) => { 
-    hello.update(event.target.value)
- })
-
-component.renderComponent([doc.miniDOM], `<div><input type='text' oninput='{{{onchange}}}' /><h1>hi {{{hello()}}} {{{hello()}}}</h1><div>`)
-
-console.log(doc.miniDOM)
+component.render()

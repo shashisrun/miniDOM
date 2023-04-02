@@ -1,9 +1,9 @@
-import miniDOM from "./miniDOM.js";
-import miniState from "./miniState.js";
-import miniComponent from "./miniComponent.js";
+import MiniDOM from "./MiniDOM.js";
+import MiniState from "./MiniState.js";
+import MiniComponent from "./MiniComponent.js";
 
 export {
-    miniDOM,
-    miniState,
-    miniComponent
+    MiniDOM,
+    MiniState,
+    MiniComponent
 }

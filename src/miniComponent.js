@@ -1,87 +1,104 @@
-import miniDOM from "./miniDOM.js";
-import miniState from "./miniState.js";
+import MiniDOM from "./MiniDOM.js";
+import MiniState from "./MiniState.js";
 
-export default class miniComponent {
+export default class MiniComponent extends MiniDOM {
 
     #states = [];
-    #functions = new Object();
-    #registeredNodes = [];
+    #componentState = [];
+    #parent;
+    #template;
+    #dynamicContent = [];
+    #registeredComponents = [];
+
+    constructor(parent) {
+        super(parent);
+        this.#parent = this.miniDOM;
+    }
 
     // use state
     useState(initState) {
         const current = this.#states.length;
-        const state = new miniState(initState);
+        const state = new MiniState(initState);
         this.#states[current] = state;
-        this.#states[current].subscribe((state) => {
-            for (let i = 0; i < this.#registeredNodes.length; i++) {
-                this.updateComponent(this.#registeredNodes[i].node, this.#registeredNodes[i].object, this.#registeredNodes[i].path, this.#registeredNodes[i].functionName)
-                this.#registeredNodes[i].node.updateDOM();
-            }
+        this.#states[current].subscribe(() => {
+            this.updateComponent()        
         });
         return this.#states[current];
     }
 
+    createTemplate(elements) {
+        this.#template = elements;
+    }
+
+    updateComponent() {
+        for (let i = 0; i < this.#registeredComponents.length; i++) {
+            this.update(this.#registeredComponents[i].object, this.#registeredComponents[i].path, this.#registeredComponents[i].value())
+        }
+        this.updateDOM();
+    }
+
     // render component
-    renderComponent(elements, component) {
-        for (let i = 0; i < elements.length; i++) {
-            const range = document.createRange();
-            
-            // Make the parent of the first div in the document become the context node
-            range.selectNode(elements[i].element);
-            const documentFragment = range.createContextualFragment(component);
-
-            const node = new miniDOM(documentFragment.childNodes[0])
-            this.attachFunction(node)
-            node.miniDOM.parentNode = elements[i];
-            elements[i].childrens.push(node.miniDOM);
-            elements[i].element.appendChild(node.miniDOM.element);
+    render() {
+        this.#parent.element.innerHTML = '';
+        this.#parent.childNodes = [];
+        for (let i = 0; i < this.#template.length; i++) {
+            this.appendNode(this.#parent, this.generateNode(this.#template[i]))
         }
+        this.updateDOM();
     }
-
-    createFunction(name, fn) {
-        this.#functions[name] = fn
-    }
-
-    getFunction(name) {
-        return this.#functions[name]()
-    }
-
-
-    attachFunction(node) {
-        const fns = node.getPrivateFunctions()
-        for (let j = 0; j < fns.length; j++) {
-            const funcRegExp = /{{{([^}]+)}}}/g;
-            const txt = node.getValue(fns[j].object, fns[j].path);
-            const matches = [...txt.match(funcRegExp)];
-            for (let k = 0; k < matches.length; k++) {
-                const match = matches[k].replace(/{{{|}}}/g, '')
-                this.#registeredNodes.push({
-                    node: node,
-                    path: fns[j].path,
-                    functionName: match,
-                    object: fns[j].object
-                })
-                this.updateComponent(node, fns[j].object, fns[j].path, match)
-            }
-        }
-        node.updateDOM();
-    }
-
-    updateComponent(node, object, path, match) {
-        const value = this.stringToFunction(match);
-        node.update(object, path, value)
-    }
-
-    stringToFunction(functionName) {
-        let func = this.#functions;
-        const fns = functionName.split('.');
-        for (let i = 0; i < fns.length; i++) {
-            if (fns[i].includes('(') && fns[i].includes(')')) {
-                func = func[fns[i].split('(')[0]]()
+    generateNode(templateNode) {
+        const node = { ...templateNode };
+        const element = this.createNode(node.tagName);
+        delete node.tagName
+        const attributes = Object.keys(node);
+        for (let i = 0; i < attributes.length; i++) {
+            if (attributes[i] === 'childNodes') {
+                const childNodes = node[attributes[i]];
+                for (let j = 0; j < childNodes.length; j++) {
+                    if (childNodes[j].tagName) {
+                        const html = this.generateNode(childNodes[j]);
+                        this.appendNode(element, html);
+                    } else {
+                        let text = this.createTextNode(childNodes[j].text);
+                        if (childNodes[j].text instanceof Function) {
+                            if (this.#dynamicContent.includes(childNodes[j].text)) {
+                                text = this.createTextNode(childNodes[j].text())
+                                this.#registeredComponents.push({
+                                    object: text,
+                                    path: 'nodeValue',
+                                    value: childNodes[j].text
+                                })
+                            } else {
+                                text = this.createTextNode(childNodes[j].text)
+                            }
+                        } else {
+                            text = this.createTextNode(childNodes[j].text)
+                        }
+                        this.appendNode(element, text)
+                    }
+                }
             } else {
-                func = func[fns[i]]
+                if (node[attributes[i]] instanceof Function) {
+                    if (this.#dynamicContent.includes(node[attributes[i]])) {
+                        this.#registeredComponents.push({
+                            object: element,
+                            path: attributes[i],
+                            value: node[attributes[i]]
+                        })
+                        this.update(element, attributes[i], node[attributes[i]]())
+                    } else {
+                        this.update(element, attributes[i], node[attributes[i]])
+                    }
+                } else {
+                    this.update(element, attributes[i], node[attributes[i]])
+                }
             }
         }
-        return func;
+        return element;
+    }
+
+    dynamic(content) {
+        this.#dynamicContent.push(content)
+        return content
     }
 }
