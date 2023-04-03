@@ -25,6 +25,10 @@ export default class miniDOM {
         return elementNode;
     }
 
+    // Copy Virtual Node
+    cloneNode(node) {
+    }
+
     // Create Virtual Node
     createTextNode(text) {
         const util = new MiniUtils()

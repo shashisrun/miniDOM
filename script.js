@@ -1,4 +1,4 @@
-import { MiniComponent, MiniDOM } from './src/index.js'
+import { MiniComponent } from './src/index.js'
 
 const container = document.createElement('div');
 document.body.appendChild(container);
@@ -63,3 +63,5 @@ component.createTemplate([
 ])
 
 component.render()
+
+console.log(component.miniDOM)

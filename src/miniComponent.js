@@ -4,7 +4,6 @@ import MiniState from "./MiniState.js";
 export default class MiniComponent extends MiniDOM {
 
     #states = [];
-    #componentState = [];
     #parent;
     #template;
     #dynamicContent = [];
