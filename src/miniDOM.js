@@ -9,7 +9,6 @@ export default class miniDOM {
     #nodeWatchers = new Map();
     #updates = new Map();
 
-
     constructor(node) {
         const util = new MiniUtils()
         this.miniDOM = util.toJSON(node);
@@ -145,26 +144,6 @@ export default class miniDOM {
             }
             this.#updates.delete(key);
         }
-    }
-
-    // add Event Listener
-    addEventListener() {
-
-    }
-
-    // remove Event Listener
-    removeEventListener() {
-
-    }
-
-    // remove Event Listener
-    removeAllEventListener() {
-
-    }
-
-    // remove Event Listener
-    listAllEventListener() {
-
     }
 
 }

@@ -1,4 +1,4 @@
-import { MiniComponent } from './src/index.js'
+import { MiniComponent, MiniDOM } from './src/index.js'
 
 const container = document.createElement('div');
 document.body.appendChild(container);
@@ -11,7 +11,7 @@ const inputText = component.useState('')
 component.createTemplate([
     {
         tagName: 'div',
-        className: component.dynamic(() => `container mx-auto ${clicks.get() % 2 === 0 ? 'bg-danger text-white' : ''}x `),
+        className: component.dynamic(() => `container mx-auto ${clicks.get() % 2 === 0 ? 'bg-red-100 text-white' : ''}x `),
         onclick: function () {
             clicks.update(clicks.get() + 1)
             console.log(`I was clicked ${clicks.get()} time(s)`)
@@ -23,6 +23,9 @@ component.createTemplate([
                 childNodes: [
                     {
                         text: component.dynamic(() => `I was clicked ${clicks.get()} time(s)`)
+                    },
+                    {
+                        text: 'component.dynamic(() => `I was clicked ${clicks.get()} time(s)`)'
                     }
                 ]
             },
@@ -71,3 +74,18 @@ component.createTemplate([
 component.render()
 
 console.log(component.miniDOM)
+
+// let hybridClicks = 0;
+// const hybridSection = new MiniDOM(document.getElementById('hybrid-section'));
+// console.log(hybridSection.miniDOM)
+// const hybridSectionDisplay = hybridSection.getElementById('hybrid-section-display').childNodes.filter(node => node.nodeValue.includes('0'))[0];
+// const hybridSectionButton = hybridSection.getElementById('hybrid-section-click');
+// hybridSection.update(hybridSectionButton, 'onclick', () => {
+//     ++hybridClicks;
+//     hybridSection.update(hybridSectionDisplay, 'nodeValue', hybridClicks);
+//     hybridSection.updateDOM();
+// });
+// hybridSection.updateDOM();
+
+
+

@@ -18,11 +18,11 @@ export default class MiniUtils{
                 if (!this.classLists[node.classList[i]]) {
                     this.classLists[node.classList[i]] = []
                 }
-                this.classLists[node.classList[i]].push(node)
+                this.classLists[node.classList[i]].push(virtNode)
             }
         }
         if (node.id) {
-            this.ids[node.id] = node;
+            this.ids[node.id] = virtNode;
         }
         if (!this.tagLists[virtNode.tagName]) {
             this.tagLists[virtNode.tagName] = []
