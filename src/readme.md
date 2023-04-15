@@ -92,6 +92,4 @@ component.render()
 
 This project is i it's early development phase and currently is solo project.
 
-This is an early implementation sample of MiniDOM.
-
 Contribution of ideas and code are welcomed!.
