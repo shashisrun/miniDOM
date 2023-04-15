@@ -78,7 +78,7 @@ component.createTemplate([
                 className: 'text-xl',
                 childNodes: [
                     {
-                        text: component.dynamic(() => inputText.get() == '' ? 'Naam to batao' :`Kaise Ho ${inputText.get()}?`)
+                        text: component.dynamic(() => inputText.get() == '' ? 'Please Enter your name' :`How are you ${inputText.get()}?`)
                     }
                 ]
             }

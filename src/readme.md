@@ -78,7 +78,7 @@ component.createTemplate([
                 className: 'text-xl',
                 childNodes: [
                     {
-                        text: component.dynamic(() => inputText.get() == '' ? 'Naam to batao' :`Kaise Ho ${inputText.get()}?`)
+                        text: component.dynamic(() => inputText.get() == '' ? 'Please Enter your name' :`How are you ${inputText.get()}?`)
                     }
                 ]
             }
@@ -91,5 +91,7 @@ component.render()
 ```
 
 This project is i it's early development phase and currently is solo project.
+
+This is an early implementation sample of MiniDOM.
 
 Contribution of ideas and code are welcomed!.
